@@ -1,6 +1,6 @@
 # Import the dependencies.
 from flask import Flask, jsonify
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, func
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.automap import automap_base
 import datetime as dt
@@ -63,29 +63,55 @@ def precipitation():
 
     results = session.query(MeasureReference.date, MeasureReference.prcp).filter(MeasureReference.date >= last_year).all()
 
-     # dictionary to hold the query values
+    # dictionary to hold the query values
     precipitation_dict = {}
 
     # list to hold the precipiation data
     precipitation_list = []
     
-    #grabs the values from the query through a loop
+    # grabs the values from the query through a loop
     for date, precipitation in results:
                 
-        #grabs query data from dictionary via above for loop iterations
+        # grabs query data from dictionary via above for loop iterations
         precipitation_dict["date"] = precipitation
-       # precipitation_dict["precipitation"] = precipitation
+        #precipitation_dict["precipitation"] = precipitation
 
-        #appends the grabbed data into the precipitation list
+        # appends the grabbed data to the precipitation list
         precipitation_list.append(precipitation_dict)
 
-        #turns the list into a JSON
-    return jsonify(precipitation_list) 
+    # turns the list into a JSON
+    #return jsonify(precipitation_list) 
+    return {date:prcp for date, prcp in results}
+
+
+@app.route("/api/v1.0/stations")
+def stations():
+
+    station_results = session.query(MeasureReference.station).all()
     
-#     for x in session.query(sortedRain).all():
-#         print(x.__dict__)
     
-#     return {date:prcp for date, prcp in sortedRain}
+    station_dict = {}
+
+    # list to hold the precipiation data
+    station_list_five = []
+    
+    # grabs the values from the query through a loop
+    for station in station_results:
+                
+        # grabs query data from dictionary via above for loop iterations
+        station_dict["tobs"] = station
+        #precipitation_dict["precipitation"] = precipitation
+
+        # appends the grabbed data to the precipitation list
+        station_list.append(station_dict)
+
+    return station_results
+#     station_list = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+# group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
+    
+#     session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+# group_by(MeasureReference.station).all()
+
 
 
 if __name__ =="__main__":
