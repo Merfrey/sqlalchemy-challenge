@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.automap import automap_base
+import datetime as dt
 import numpy as np
 
 #################################################
@@ -58,27 +59,28 @@ def home():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
 
+    last_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+
+    results = session.query(MeasureReference.date, MeasureReference.prcp).filter(MeasureReference.date >= last_year).all()
+
+     # dictionary to hold the query values
+    precipitation_dict = {}
+
     # list to hold the precipiation data
     precipitation_list = []
     
     #grabs the values from the query through a loop
     for date, precipitation in results:
-            
-        # dictionary to hold the query values
-        precipitation_dict = {}
-        
+                
         #grabs query data from dictionary via above for loop iterations
-        precipitation_dict["date"] = date
-        precipitation_dict["precipitation"] = precipitation
+        precipitation_dict["date"] = precipitation
+       # precipitation_dict["precipitation"] = precipitation
 
         #appends the grabbed data into the precipitation list
         precipitation_list.append(precipitation_dict)
 
-        #turns the list into a JSOn
-    return jsonify(precipitation_list)
-
-    
-    
+        #turns the list into a JSON
+    return jsonify(precipitation_list) 
     
 #     for x in session.query(sortedRain).all():
 #         print(x.__dict__)
