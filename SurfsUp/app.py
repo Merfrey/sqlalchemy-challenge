@@ -104,30 +104,54 @@ def stations():
     stations = list(np.ravel(results))
     return jsonify(stations=stations)
         
-    station_dict = {}
+    # station_dict = {}
+    # # list to hold the station data
+    # station_list = []
+    # # grabs the values from the query through a loop
+    # for station in station_results:    
+    #     # grabs query data from dictionary via above for loop iterations
+    #     station_dict["tobs"] = station
+    #     #precipitation_dict["precipitation"] = precipitation
+    #     # appends the grabbed data to the precipitation list
+    #     station_list.append(station_dict)
+    # return {station_results}
 
-    # list to hold the precipiation data
-    station_list = []
+@app.route("/api/v1.0/tobs")
+def tobs():
     
-    #     station_list = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
-# group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
+     # Create our session (link) from Python to the DB
+    session = Session(engine)
     
-#     session.query(MeasureReference.station, func.count(MeasureReference.station)).\
-# group_by(MeasureReference.station).all()
+    # Design a query to find the most active stations (i.e. which stations have the most rows?)
+    # List the stations and their counts in descending order.
+    allStation = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+    group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
+    
+    print(allStation)
 
-    # grabs the values from the query through a loop
-    for station in station_results:
-                
-        # grabs query data from dictionary via above for loop iterations
-        station_dict["tobs"] = station
-        #precipitation_dict["precipitation"] = precipitation
+    # Using the most active station id, calculate the lowest, highest, and average temperature.
+    session.query(MeasureReference.station, func.min(MeasureReference.tobs), func.max(MeasureReference.tobs),\
+    func.avg(MeasureReference.tobs)).filter(MeasureReference.station == "USC00519281").all()
 
-        # appends the grabbed data to the precipitation list
-        station_list.append(station_dict)
+    # Query the last 12 months of temperature observation data for this station
+    results = session.query(MeasureReference.tobs).filter().\
+    filter(MeasureReference.station == "USC00519281").all()
 
-    return {station_results}
+    session.close()
+    
+     # Convert list of tuples into normal list
+    tobs_list = list(np.ravel(results))
+    return jsonify(tobs_list=tobs)
+
+@app.route(f"/api/v1.0/<start><br/>")
+def start():
+
+    #some code here
+    f 
 
 
+@app.route(f"/api/v1.0/<start>/<end><br/>")
+def start_and_end():
 
 if __name__ =="__main__":
         app.run(debug=True)
