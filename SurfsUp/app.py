@@ -120,38 +120,92 @@ def stations():
 def tobs():
     
      # Create our session (link) from Python to the DB
-    session = Session(engine)
+    # session = Session(engine)
+    last_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+
+    #Query the last 12 months of temperature observation data for this station
+    results = session.query(MeasureReference.date, MeasureReference.tobs).\
+    filter(MeasureReference.date >= last_year).filter(MeasureReference.station == "USC00519281").all()
+
+    tobs_dict = {}
+
+    # list to hold the data
+    tobs_list = []
     
-    # Design a query to find the most active stations (i.e. which stations have the most rows?)
-    # List the stations and their counts in descending order.
-    allStation = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
-    group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
-    
-    print(allStation)
+    # grabs the values from the query through a loop
+    for date, tobs in results:
+                
+        # grabs query data from dictionary via above for loop iterations
+        tobs_dict["date"] = tobs
 
-    # Using the most active station id, calculate the lowest, highest, and average temperature.
-    session.query(MeasureReference.station, func.min(MeasureReference.tobs), func.max(MeasureReference.tobs),\
-    func.avg(MeasureReference.tobs)).filter(MeasureReference.station == "USC00519281").all()
+        # appends the grabbed data to the tobs list
+        tobs_list.append(tobs_dict)
 
-    # Query the last 12 months of temperature observation data for this station
-    results = session.query(MeasureReference.tobs).filter().\
-    filter(MeasureReference.station == "USC00519281").all()
-
-    session.close()
+    # turns the list into a JSON
+    #return jsonify(tobs_list) 
+    return {date:tobs for date, tobs in results}
     
      # Convert list of tuples into normal list
-    tobs_list = list(np.ravel(results))
-    return jsonify(tobs_list=tobs)
+    # tobser = list(np.ravel(results))
+    # return jsonify(tobser)
 
 @app.route(f"/api/v1.0/<start><br/>")
 def start():
+    
+    session = Session(engine)
+    
+    # Design a query to find the most active stations (i.e. which stations have the most rows?)
+    # # List the stations and their counts in descending order.
+    # allStation = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+    # group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
+    
 
-    #some code here
-    f 
+    # Using the most active station id, queries the lowest, highest, and average temperature.
+    tobs_get = session.query(MeasureReference.station, func.min(MeasureReference.tobs), func.max(MeasureReference.tobs),\
+    func.avg(MeasureReference.tobs)).filter(MeasureReference.station == "USC00519281").all()
+
+    session.close()
+
+    #specified_start = code for getting user input
+    specified_start = '2010-01-04'
+
+    all_temps = []
+
+    for x in tobs_get:
+        tobs_dict = {}
+        
+        range(specified_start)
+  
+        tobs_dict["TMIN"] = func.min(MeasureReference.tobs)
+        
+        all_temps.append(tobs_dict)
+
+    return jsonify(all_temps)
 
 
-@app.route(f"/api/v1.0/<start>/<end><br/>")
-def start_and_end():
+
+
+    # results = session.query(Passenger.name, Passenger.age, Passenger.sex).all()
+
+    # # Create a dictionary from the row data and append to a list of all_passengers
+    # all_passengers = []
+    # for name, age, sex in results:
+    #     passenger_dict = {}
+    #     passenger_dict["name"] = name
+    #     passenger_dict["age"] = age
+    #     passenger_dict["sex"] = sex
+    #     all_passengers.append(passenger_dict)
+
+    # return jsonify(all_passengers)
+
+
+
+
+
+        
+
+# @app.route(f"/api/v1.0/<start>/<end><br/>")
+# def start_and_end():
 
 if __name__ =="__main__":
         app.run(debug=True)
