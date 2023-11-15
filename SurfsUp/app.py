@@ -87,14 +87,34 @@ def precipitation():
 @app.route("/api/v1.0/stations")
 def stations():
 
-    station_results = session.query(MeasureReference.station).all()
-    
-    
+    # station_results = session.query(MeasureReference.station).all()
+
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all passenger names"""
+    # Query all passengers
+    #results = session.query(station.name).all()
+
+    results = session.query(StationReference.station).all()
+
+    session.close()
+
+    # Convert list of tuples into normal list
+    stations = list(np.ravel(results))
+    return jsonify(stations=stations)
+        
     station_dict = {}
 
     # list to hold the precipiation data
-    station_list_five = []
+    station_list = []
     
+    #     station_list = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+# group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
+    
+#     session.query(MeasureReference.station, func.count(MeasureReference.station)).\
+# group_by(MeasureReference.station).all()
+
     # grabs the values from the query through a loop
     for station in station_results:
                 
@@ -105,12 +125,7 @@ def stations():
         # appends the grabbed data to the precipitation list
         station_list.append(station_dict)
 
-    return station_results
-#     station_list = session.query(MeasureReference.station, func.count(MeasureReference.station)).\
-# group_by(MeasureReference.station).order_by(func.count(MeasureReference.station).desc()).all()
-    
-#     session.query(MeasureReference.station, func.count(MeasureReference.station)).\
-# group_by(MeasureReference.station).all()
+    return {station_results}
 
 
 
